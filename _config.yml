@@ -23,7 +23,7 @@ email: dlwlgns2792@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Jihun Lee. Inha Univ, Dept. ICE
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "jijihuny.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://jijihuny.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: 
 github_username:  jijihuny
 
