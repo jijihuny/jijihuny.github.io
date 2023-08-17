@@ -3,7 +3,7 @@ title: "부스트캠프 웹모바일 챌린지 합격 후기"
 # excerpt: ""
 
 categories:
-    - 수기
+    - etc
 tags:
     - [부스트캠프, 웹모바일, 웹풀스택, 챌린지]
 
