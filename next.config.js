@@ -65,7 +65,6 @@ module.exports = () => {
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
-    basePath: "/tailwind-nextjs-starter-blog",
     output: 'export',
     images: {
       remotePatterns: [
