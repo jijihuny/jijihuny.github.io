@@ -1,4 +1,8 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.associations": { "*.mdx": "md" },
+  "markdown.copyFiles.destination": {
+    "/data/**/*": "public/${documentBaseName}/"
+  }
 }
