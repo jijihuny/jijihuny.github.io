@@ -1,8 +1,9 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "files.associations": { "*.mdx": "md" },
+  "files.associations": { "*.mdx": "markdown" },
   "markdown.copyFiles.destination": {
-    "/data/**/*": "public/${documentBaseName}/"
-  }
+    "/data/**/*": "/public/blog/${documentBaseName}/"
+  },
+  "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
 }
