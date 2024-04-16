@@ -115,7 +115,7 @@ f_v^{V-1} = f_v
 $$
 임을 증명할 것이다.
 
-$f_v^{k}=$최대 k개의 간선을 고려한 최단거리경로임을 보이면 된다.
+$f_v^{k}=$최대 k개의 간선을 고려한 최단거리경로의 거리임을 보이면 된다.
 
 수학적 귀납법을 이용하자.
 
@@ -130,7 +130,7 @@ $$
 
 Inductive Step: 
 
-$\forall v \in V,$ $f_v^{k-1}$가 최대 k-1개의 간선을 이용한 최단거리경로라고 가정하자.
+$\forall v \in V,$ $f_v^{k-1}$가 최대 k-1개의 간선을 이용한 최단거리경로의 거리라고 가정하자.
 
 이제 $v \neq s$일 때, 
 최대 k개의 간선을 고려한 최단거리 경로 $P = v_0 \rightarrow v_1 \rightarrow \dots \rightarrow v_{n} \rightarrow v$에 대해서 
@@ -144,13 +144,19 @@ $$
 
 $$
 \begin{split}
-w(P) \leq f_v^{k} &= \min_{j \neq k}(f_j^{k-1} + w(j \rightarrow v))\\
+f_v^{k} &= \min_{j \neq k}(f_j^{k-1} + w(j \rightarrow v))\\
 &\leq f_{v_{n}}^{k-1} + w(v_{n} \rightarrow v) = w(P)
 \end{split}
 $$
-이므로
+에서 만약 $\exists u \in V \space s.t f_v^k = f_u^{k - 1} + w(u \rightarrow v) < w(P)$라면,
+가정에 의해 $f_u^{k-1}$이 최대 k-1개의 간선을 고려한 최단거리경로이기 때문에,
+$$
+\exists Q = u0 \rightarrow u1 \rightarrow \dots \rightarrow u \rightarrow v \space s.t \\
+w(Q) = f_u^{k-1} + w(u \rightarrow v) \lt w(P) 
+$$
+이기 때문에 $P$가 최단거리경로라는 조건에 모순된다.
 
-$f_v^k$는 k개의 간선을 고려한 최단거리경로이다.
+따라서 $f_v^{k} = w(P)$이고 증명이 완료된다.
 
 ### 2. Detects Negative Cycle
 
@@ -172,7 +178,7 @@ $$
 \end{align}
 $$
 
-$v_0=v_k$가 자명하기 때문에 (3)의 양변 첫항을 제거할 수 있다.
+$v_0=v_k$가 자명하기 때문에 (4)의 양변 첫항을 제거할 수 있다.
 
 따라서
 $$
@@ -180,7 +186,7 @@ $$
 0 \leq \sum_{i=1}^{k}w(v_{i-1}, v_{i})
 \end{align}
 $$
-이고 이것은 (1)에 모순이다.
+이고 이것은 (3)에 모순이다.
 
 
 ## 출처
