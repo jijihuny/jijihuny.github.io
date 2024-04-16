@@ -93,7 +93,9 @@ $$
 \begin{align}
 \begin{split}
 f_i &= shortest \space path \space to \space i\\
-w&: V \rightarrow \R = cost \space of \space edge\\
+w&: V \times V \rightarrow \R = cost \space of \space edge\\
+v \rightarrow u &= edge \space from \space v \space to \space u \\
+w(v \rightarrow u)&=w(v, u) \\
 f_i^0 &= w(1,i)\\
 f_i^k &= \min_{j \neq i}(f_j^{k-1} + w(j, i)), \space i, j \in V \\
 \end{split}
