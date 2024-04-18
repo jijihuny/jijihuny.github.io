@@ -1,0 +1,184 @@
+---
+title: "네트워크 장치 : 인터넷 프로토콜 - 2"
+date: 2024-04-18
+tags: [네트워크, 인터넷프로토콜, OSI]
+---
+
+## Networking Devices
+
+### 1. Repeater
+
+Physical Layer를 담당하는 장비이다.
+
+물리적 링크 간 bitstream을 전송하는 과정에서 신호가 약해진 데이터를 재생성하여 원래의 강도만큼 다시 증폭된 신호를 목적지로 전달한다.
+
+i/o를 담당하는 2-port로만 이루어졌다.
+
+![alt text](/blog/networking_devices/image.png)
+
+### 2. Hub
+
+마찬가지로 Physical Layer 장비이다.
+
+기본적으로 multi-port repeater로 볼 수 있는데, 다수의 노드가 허브에 직접 연결된 형태이다.
+
+들어온 데이터를 연결된 모든 노드에 동일하게 재전송한다. 즉, 패킷을 보내기 위한 최적의 경로를 찾지 않기 때문에 데이터의 낭비와 비효율적이다.
+
+모든 데이터 전송은 브로드캐스팅이기 때문에 어떤 보안 절차도 없다.
+
+Half-duplex mode는 한 번에 1 장치만 통신할 수 있는 걸 말한다.
+
+어떤 이유건 데이터가 손실되더라도 재전송을 하지 않고 신뢰성에 대해 책임지지 않는다.
+
+또 mac 주소를 포함해 어떤 종류의 테이블도 가지고 있지 않다.
+
+![alt text](/blog/networking_devices/image-1.png)
+
+#### Types of Hub
+
+- Active Hub: 전원장치를 가지고 있다. 신호의 clean, boost, relay를 수행한다. 
+repeater + wiring center.
+node 간의 maximum 거리를 연장하는 용도로 쓰인다.
+
+- Passive Hub: Active Hub로부터 전원과 wiring을 제공받는다. 신호의 relay를 위해 사용되며 거리를 연장하지 못한다.
+
+- Intelligent Hub: active hub + remote management capabilities. 유연한 데이터 전송률을 제공한다. 트래픽을 모니터링할 수 있고, 각 포트를 관리할 수도 있다.
+
+
+### 3. Bridge
+
+Data Link Layer의 장비이다.
+들어오는 트래픽을 검증하고, 다음 지점으로 보낼 지 말지를 결정한다.
+
+![alt text](/blog/networking_devices/image-2.png)
+
+bridge는 네트워크 연결을 section으로 나누는 역할을 한다.
+각각의 section은 각각의 bandwidth와 collision domain을 가진다.
+
+![alt text](/blog/networking_devices/image-3.png)
+
+#### Transparent Bridge
+
+![alt text](/blog/networking_devices/image-4.png)
+
+mac 주소에 따라 데이터를 block할지 forward할지 결정한다.
+네트워크에 어떤 Host를 추가하거나 삭제할 필요 
+없이 작동한다.
+
+IEEE의 산업 표준 802.1D에 의해 채택되었다.
+
+만약 Host1과 Host2가 데이터를 교환 중이라면,
+다른 collision domain에 속한 host4와 host5가 동시에 대화를 진행할 수 있다.
+
+어떤 Host가 어떤 bridge side에 연결되었는지는 어떻게 식별할까?
+
+802.1D는 5개의 process를 통해 이에 대해 명세한다.
+
+1. Learning
+
+bridge가 처음 켜지면, bridge table에는 아무런 주소도 을 것이다.
+만약 어떤 트래픽이 처음 bridge를 지나가면,
+bridge는 이 트래픽이 누구의 것인지(Mac address), 그리고 어떤 port에서 들어왔는지를 보고 각 Collision domain에 있는 장치들을 bridge table(= Mac table, Content Addressable Memery Table)에 기록한다.
+
+2. Flooding
+
+만약 들어온 트래픽에 대해 목적지 주소를 알지 못할 경우, bridge는 이 트래픽을 source 포트를 제외한 모든 포트로 broadcasting한다.
+
+이를 통해 bride의 학습 과정에서도 포트 간의 데이터 교환이 실패하지 않도록 보장해준다.
+
+3. Filtering
+
+bridge가 장치들이 어떤 포트로 연결되었는지 학습하고 나면, filtering을 수행할 수 있다.
+
+만약 주어진 트래픽의 source, destination이 동일한 port쪽에 속해있을 경우, bridge는 이 트래픽을 다른 port에 보내지 않는다.
+
+이를 통해 아까 말했듯 Host1-Host2, Host4-Host5가 동시에 대화할 수 있게 된다.
+
+4. Forwarding
+
+Forwarding은 주어진 트래픽의 목적지 포트를 이미 알고 있을 경우 해당 포트로 트래픽을 보내는 것을 의미한다.
+
+5. Aging
+
+Aging은 bridge 테이블의 수정과 삭제를 가능하도록 도와준다.
+
+bridge는 매 트래픽마다 해당 트래픽이 들어온 시간을 기록하고 타이머를 시작한다.
+
+만약 매 forwarding 혹은 filtering마다 타이머를 재시작하며, 만약 타이머가 종료될 경우 해당 장치의 테이블 entry를 삭제한다.
+
+#### Source Routing Bridge
+
+IBM에서 설계, 제작한 장비로 token ring 네트워크에 특화되었다.
+
+### 4. switch
+
+data link layer의 장비인 switch는 서로 다른 포트로부터 들어온 트래픽을 적절한 포트로 연결해주는 역할을 한다.
+
+bridge와 상당히 흡사한 기능을 하는데,
+둘의 차이점은 아래와 같다.
+
+| Bridge | Switch |
+| --- | --- |
+| Software-based packet forwarding | Hardware-based(ASICS) packet forwarding |
+| store and forward | store and forward, cut-through, or fragment-free |
+| 2-4 ports | many ports |
+| divide collision domain into two parts. But no broadcast domain | There will be separate collision domain for each of the nodes. |
+
+여기서 위에 나온 switching 방식들을 몇 가지 살펴보자.
+
+- Store and Forward
+
+각각의 Etherenet frame을 메모리에 복사하고 CRC(Cycle Redundancy Check)를 계산하여 Error를 검출한다.
+
+만약 Error가 발생할 경우 frame을 버리고, 그렇지 않으면 목적지 장치로 패킷을 forward한다.
+
+각각의 frame에 대해 모두 Error 체크를 수행하기 때문에 delay가 발생한다.
+
+- Cut-Through
+
+frame의 목적지 Mac 주소(첫 6 bytes=48 bits)만을 메모리에 복사하고 곧바로 목적지 포트로 forwarding한다.
+
+Error를 확인하지 않아 delay가 적지만, 신뢰성 없이 frame을 전송할 수 있는 위험성이 있다.
+
+- Fragment-Free
+
+cut-through의 발전된 형태이다.
+runt라는 것은 같은 collision domain에 속하는 패킷들이 서로 충돌하여 쪼개지며 발생하는 불완전한 패킷 조각들을 말한다.
+
+Ethernet 패킷의 최소 크기는 64바이트인데, 이는 Collision Detection을 검출하기 위한 최소 크기이다.
+
+Ethernet 통신은 패킷이 서로 충돌하면, 피드백을 통해 Host가 패킷을 다시 전송하는 알고리즘으로 구성되어있는데 이를 확인하기 위한 최소 크기가 64바이트인 것이다.
+
+따라서 64바이트보다 작은 runt들이 네트워크를 돌아다니게 되면 전체 호스트에게 영향을 주게 되고 packet collision이 증가하게 된다.
+
+Fragment-Free는 이러한 runt를 예방하기 위한 switching 방식이다.
+
+패킷이 도착하면 ethernet frame의 최소 64바이트를 메모리에 읽으며, 패킷이 runt인지 아닌지 최소한의 검증을 진행하고 forward를 진행한다.
+
+따라서 Cut-Through보다 조금 더 위험성을 줄이고 store and forward에 비해 더 낮은 delay를 확보할 수 있는 방법이다.
+
+| | store and forward | cut-through | fragment-free |
+| --- | --- | --- | --- |
+| Frame processing starts | 모든 frame을 검증하고 난뒤(CRC) | 첫 6바이트(Dst Mac Adr)를 읽은 뒤 | 첫 64바이트를 읽은 뒤 |
+| CRC check | Yes | No | No |
+| Runt frame forwarding | No | Yes | No |
+| Speed | Third | First | Second |
+| Accuracy | First | Third | Second |
+
+### 5. Router
+
+Network Layer에서 작동하는 Router는 인터넷의 동작에 핵심적인 역할을 담당한다.
+패킷의 Destination IP 주소를 routing table과 비교하고 최선의 next hop(경로)를 결정한다.
+
+Routing Table은 주어진 목적지 네트워크에 도달하기 위한 다음 경로와 비용 등을 저장한 테이블이다.
+
+| Switching | Routing |
+| --- | --- |
+| Layer 2 | Layer 3 |
+| ASIC 기술을 통해 빠른 속도 보장 | Software에 따라 느린 속도 |
+| 만약 목적지를 모를 경우 Broadcast | 목적지를 모를 경우 패킷 drop |
+| 하나의 broadcasting domain 안에서 완료 | 다른 네트워크에서 완료 |
+| Mac 주소 | IP 주소 |
+| frame | packet |
+
+![alt text](/blog/networking_devices/image-5.png)
