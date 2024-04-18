@@ -1,0 +1,109 @@
+---
+title: 인터넷의 등장, OSI 계층 : 인터넷 프로토콜 - 1
+date: 2024-04-18
+tags: [네트워크, 인터넷프로토콜, OSI]
+---
+
+
+
+## History of the Internet
+
+### Internetworking Architectuere(strategies)
+
+https://groups.csail.mit.edu/ana/A%20brief%20history%20of%20the%20internet%20-%20p22-leiner.pdf
+
+인터넷이 구상되던 초창기, 특히 TCP/IP를 고안하면서 떠오른 아이디어와 구상은 아래와 같다.
+
+1. 개별 네트워크는 그 자체로 작동하고 돌아가며, 인터넷에 연결하기 위해 어떤 내부 변화도 필요없어야 한다.
+
+2. 패킷 에러(손실, 손상 등)가 발생할 시, 재전송(retransmission)한다.
+
+3. 네트워크들을 연결하기 위해 black box가 사용될 것이다. 이는 추후 게이트웨이와 라우터라고 불린다.
+
+4. 인터넷의 작동에 있어 어떠한 전역적 통제도 없을 것이다.
+
+## OSI Architecture
+
+Open System Interconnection Reference Model
+
+![alt text](/blog/internet_protocol_preview/image.png)
+
+> provides a common basis for the coordination of standards development for the purpose of systems interconnection.
+
+시스템 간의 통신을 7개의 계층으로 나누어 물리적 통신의 구현으로부터 고수준의 어플리케이션 계층까지 통신과정을 추상화한다.
+
+1. Physical Layer
+
+가장 하위 계층으로 물리적인 매개체를 통해 데이터(bit 0, 1)를 전송한다.
+노드와 노드 간 물리적, 전기적 인터페이스를 정의하여 물리적 연결의 수립, 유지, 종료를 관리한다.
+디지털 데이터를 매개체의 특성에 맞추어 어떻게 아날로그 데이터로 만들어낼 것인지 결정한다.
+
+2. Data Link Layer
+
+물리 계층으로부터 받은 bitstream을 동기화하고 식별한다.
+
+Data Link Layer는 다시 LLC와 MAC이라는 두 서브계층으로 나뉜다.
+
+- LLC: Logical Link Control
+
+상위 계층의 프로토콜을 multiplexing.
+주소 체계를 제공하고, 전송 매개체에 따라 어떤 식으로 데이터를 교환할지 명시한다.
+
+- MAC: Media Access Control
+
+물리적 통로에서 누구와 통신할지를 결정한다.
+또한 bitstream으로부터 frame을 식별한다.
+여기까지가 인접한 Node 간(Node-to-Node)의 신뢰성있는 데이터 전송을 책임진다.
+
+3. Network Layer
+
+Data Link Layer에서 노드 간의 물리적 주소를 식별했다면,
+Network Layer에서는 노드 간의 논리적 주소를 식별하여 서로 다른 물리적 네트워크(직접적으로 물리적 연결이 되지 않았을 때)에 속하더라도 연결을 수립할 수 있도록 한다.(End-to-End)
+상위 계층의 데이터를 여러 개의 패킷으로 나누어 조절한다.
+
+4. Transport Layer
+
+Network Service와 상위 계층의 User Service를 분리한다.
+end-to-end 간 신뢰성 있는(Reliable) 데이터 전송을 책임진다.
+Process 간(Process-to-Process) 데이터가 교환될 수 있도록 책임진다.
+데이터의 fragmentation, combining, connection control, flow control, error control, congestion control 등 역할을 담당한다.
+
+5. Session Layer
+
+세션을 통한 연결을 추상화한다.
+둘 이상의 컴퓨터 간의 논리적 연결 setup, connection, termination을 제어한다.
+full-duplex half-duplex, simplex operation
+
+6. Presentation Layer
+
+표현 계층은 상위 계층의 데이터 formatting, translation을 담당한다.
+protocol conversion, encryption, decryption, compression, decompression 등을 담당한다.
+
+7. Application Layer
+
+응용 서비스로서 동작한다. HTTP 등
+
+### Encapsulation and Decapsulation
+
+1. Encapsulation:
+각 계층에서 상위 계층의 데이터는 하위 계층에 의해 감싸질 데이터로 취급된다.
+
+2. Decapsulation:
+수신 호스트에선 수신 데이터의 각 헤더를 벗겨내며 각 계층의 역할을 수행하고 최종적으로 Application으로 도달하게 된다.
+
+![alt text](/blog/internet_protocol_preview/image-1.png)
+
+### Layer Interface
+
+![alt text](/blog/internet_protocol_preview/image-2.png)
+
+| Component | Definition |
+| --- | --- | 
+| SDU | N + 1 계층으로부터 도달하는 유저데이터. |
+| PCI | 다른 peer layer로 보내질 Header, Trailer. 해당 계층에서 수행할 기능(error detection, address 식별 등)에 대해 지시한다. |
+| PDU | SDU + PCI |
+| ICI | N에서 N-1 계층으로 이동할 임시 파라미터 |
+| IDU | 계층 간에 이동할 전체 정보 |
+
+예를 들면 TCP의 세그먼트가 PDU가 되어 IP 계층으로 전해지고
+IP의 데이터그램이 PDU가 되는 등..
