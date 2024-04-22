@@ -1,0 +1,229 @@
+---
+title: "IPv6"
+date: 2024-04-22
+tags: [IPv6, 네트워크, 인터넷프로토콜, OSI]
+---
+
+## Overview
+
+IPv4는 32 bits 주소 체계를 사용하여 총 주소 공간의 개수가 약 42억개 정도로 제한됩니다.
+
+스마트폰이 보급되고 IoT가 활성화되며 인터넷이 필요하지 않은 곳이 없어지면서
+이를 국제적으로 관리하는 IANA의 주소풀이 2011년에 고갈되었는데요.
+
+이제 새로운 주소의 할당은 존재하지 않으며 RIR(Regional Internet Registries)에 남아있는 주소들만이 존재합니다.
+
+이에 따라 NAT(Network Address Translation)의 사용률이 증가하고 주소 공간 거래나 임대 비용이 증가했습니다. 일부 기관은 주소들을 반환하도록 권장받기호 했습니다.
+
+이에 새롭게 넉넉한 주소공간을 가진 IP를 개발할 필요성이 생겼고 이에 따라 등장한 것이 IPv6입니다.
+
+## IPv6 특징
+
+- 128-bit 주소 공간을 통해 총 $2^{128}$= 약 $3.4 \times 10^{38}$개의 주소공간을 확보하여 적어도 당분간은 주소가 부족할 걱정은 하지 않아도 됩니다.
+- DHCP 서버의 경우 남아있는 IP 공간을 고려해야 했으나, IPv6는 모든 기기가 자동으로 주소를 생성할 수 있도록 할 수 있습니다.
+- 향상된 QoS(Quality of Service)
+- 향상된 보안
+
+## IPv4와 비교
+
+- 위에서도 말했듯 4 bytes에서 16 bytes로 주소 길이가 늘어나 주소 공간의 크기도 어마어마하게 커졌습니다.
+- 헤더 간편화 : IPv4에서 필요 없어진 헤더를 삭제하였습니다.
+- 이제 헤더 체크섬을 삭제하여 Error detection 및 체크섬 계산을 위한 오버헤드를 줄였습니다.
+- Hop-by-Hop Segmentation을 수행하지 않고 Path MTU discovery를 통해 처음부터 MTU를 고려한 Segment를 수행합니다.
+- Broadcast 삭제.
+- 인증과 보안 기능
+
+## IPv6 format
+
+![alt text](/blog/ipv6/image.png)
+
+IPv6 데이터그램은 이제 64비트 aligned로 구성됩니다.
+헤더 기본 길이는 40 bytes이며,
+IPv4와 비교하면 정말 많은 헤더 필드가 삭제되었습니다.
+
+- 바뀌지 않은 필드는 Version, Source/Destination Address 뿐입니다.
+- Traffic Class와 Hop Limit은 이름이 수정되었습니다.
+- Payload length와 Next Header는 의미와 이름이 조금씩 수정되었습니다.
+- 이전에 없던 필드로 Flow Label이 추가되었습니다.
+- 불필요한 헤더 길이와 동작을 위해 다섯 개의 필드가 삭제됐습니다.
+- Options 헤더는 이제 기본 헤더와 완전히 분리되었습니다.
+- Fragmentation은 이제 네트워크 환경이 변하며 IPv4에 비해서 덜 사용되는 필드가 되었습니다. 따라서 파편화가 필요할 때만 extension header로 추가됩니다.
+- checksum은 상/하위 계층에서 이미 Error check와 correction을 수행하기 때문에 IP에서는 더 이상 수행하지 않습니다.
+- 이제 헤더 길이가 fixed 40 bytes가 되어 length 필드는 데이터(payload)의 길이만 표현하게 됩니다.
+
+```cpp
+struct IPv6Header {
+    // constant 6
+    version : 4 bits
+    // 상위 6비트는 differentiated service 필드이고,
+    // 하위 2비트는 Explicit Congestion Notification(ECN) 필드이다.
+    traffic_class : 8bits
+
+    //TCP session이나 media stream에서 데이터의 흐름을 식별하기 위한 식별자.
+    // flow : group of packet
+    flow_label : 20 bits
+
+    // 데이터의 길이를 octets 단위로 표기합니다.
+    payload_length : 16 bits
+
+    // 다음 헤더의 type을 명시합니다.
+    // 보통 Transport Layer의 프로토콜을 명시하며 extension 헤더를 사용할 경우 
+    // 어떤 extension 헤더가 오는지 명시합니다.
+    next_header : 8 bits
+
+    // TTL입니다.
+    // 기존 IPv4의 TTL이 시간 단위를 사용했으나, 기술적 문제로 hop 의 개수로 바뀌어
+    // 이를 이름에 반영했습니다.
+    hop_limit : 8 bits
+}
+```
+
+## IPv6 Extension Headers
+
+IPv6에선 IPv4의 옵셔널 헤더를 대신해 확장헤더가 생겼습니다.
+확장헤더는 IPv6헤더와 상위계층 헤더 사이에 위치하게 됩니다.
+
+이를 통해 라우터는 IPv6 패킷을 처리할 때 Hop-by-Hop 옵션을 제외하면
+기본 헤더만을 처리해도 충분해졌고, router의 forwarding에 대한 부정적 영향을 제거하는 결과가 됐습니다.
+
+이에 따라 약간의 규칙이 생겼는데요.
+
+- Hop-by-Hop 확장 헤더는 반드시 패킷의 전송 경로의 모든 노드에서 반드시 처리되어야 합니다.
+- 또한 Hop-by-Hop 확장 헤더는 반드시 IPv6 헤더의 바로 뒤에 위치해야 합니다.
+- 확장헤더는 패킷에 위치한 순서를 엄격히 준수하여 처리됩니다.
+
+이에 따라 [RFC2460](https://datatracker.ietf.org/doc/html/rfc2460#page-4)은 다음의 순서를 추천하였습니다.
+![alt text](/blog/ipv6/image-1.png)
+
+따라서 확장 헤더는 크게 다음과 같이 분류할 수 있는데요.
+
+- 매 Hop마다 처리되어야 할 헤더
+
+Router alert option과 Jumbo payload option이 있습니다.
+
+- 오직 목적지에서만 처리되는 헤더
+
+목적지 노드에서 검증되어야 할 정보를 전송할 용도로 사용됩니다.
+
+![alt text](/blog/ipv6/image-2.png)
+
+Hop-by-Hop 헤더는 반드시 IPv6 바로 뒤에 나타나야 하기 때문에 CPU에 의해 처리됩니다.
+
+만약 Hop-by-Hop이 없을 경우 HW engine에서 빠르게 패킷을 처리하고 다음 경로로 패킷을 보낼 수 있게 됩니다.
+
+확장 헤더를 명시하는 것은 아래 그림을 보면 좀 더 이해가 쉽습니다.
+
+![alt text](/blog/ipv6/image-3.png)
+
+Next Header에 UL(Upper Layer)의 프로토콜을 명시하거나 Extension Header의 타입을 명시해주는 식으로 확장성 있는 옵션 추가를 할 수 있습니다.
+
+## Address
+
+IPv6가 등장한 가장 큰 이유는 바로 넉넉한 주소공간의 확보입니다.
+IPv6의 주소공간 크기는 약 $3.4 \times 10^{38}$는 약 $5 \times 10^{28}$개의 주소를 전 세계의 한 사람 당 쓸 수 있도록 만들어주니 어마어마한 크기이죠.
+
+## Address Representation
+
+IPv6 주소는 128비트로 16비트씩 8개의 필드로 나누어 표기합니다.
+각 필드는 case insensitive hexadecimal로 표기하며 구분점으로 colon(:)을 사용합니다.
+
+ex) 2031:0000:130F:0000:0000:09c0:875A:130B
+
+따라서 모든 주소를 표기하면 글자수가 상당한데요.
+
+이를 줄이기 위해 몇 가지 룰이 있습니다.
+
+1. Omitting leading 0s
+
+첫 번째룰은 하나의 필드에서 앞에 나오는 0을 모두 제거하는 것 입니다.
+이를 통해 01AB = 1AB로 00AB = AB로 표기할 수 있습니다.
+
+2. Omitting All 0 segments
+
+double colon(::)을 통해 연속적인 0이 나오는 필드순열을 대체할 수 있는데요.
+
+예를 들면 위에서 나왔던 2031:0000:130F:0000:0000:09c0:875A:130B를 
+2031:0:130F::9c0:875A:130B로 표기할 수 있는 것 입니다.
+
+여기서 주의할 점은 double colon이 두 번 연속 나올 수 없다는 점인데요.
+
+double colon은 두 개 이상의 필드를 함축할 수 있기 때문에 두 번 이상 나타나면
+각 double colon이 몇 개의 0 필드를 뜻하는지 알 수 없기 때문입니다.
+
+이를 다른 말로 compressed format이라고 부릅니다.
+
+따라서 이러한 규칙을 적용해 0:0:0:0:0:0:0:1 => ::1, 0:0:0:0:0:0:0:0 => ::
+등으로도 표현할 수 있습니다.
+
+## Prefix
+
+IPv4와 마찬가지로 IPv6도 variable한 prefix 길이를 가질 수 있는데요.
+CIDR에서의 표기와 똑같이 ::1/128 등으로 서브넷 마스크의 길이를 함축할 수 있습니다.
+
+## IPv4-Compatible
+
+기존의 IPv4와 호환도 가능합니다.
+
+0:0:0:0:0:0:192.168.30.1 = ::192.168.30.1 = ::C0A8:1E01
+등으로 표기 가능합니다.
+
+## Address Type
+
+IPv4 주소 타입은 크게
+
+- Unicast: One to One (Global, Unique Local, Link Local)
+- Anycast: One to Nearest (Allocated from Unicast)
+- Multicast: One to Many
+를 지원하며 broadcast 주소는 지원되지 않습니다.
+
+![alt text](/blog/ipv6/image-4.png)
+
+1. Global Unicast
+
+공용 IPv4 유사한 역할입니다.
+인터넷에서 유일함이 보장되며 라우팅이 가능합니다.
+IPv4와 마찬가지로 static, dynamic한 설정이 모두 가능합니다.
+
+2. Link Local
+
+Local Link 내부에서 다른 장치와 통신하기 위해 사용됩니다.
+단일 링크 내부로 제한되며 링크를 넘어 라우팅은 불가능합니다.
+
+3. Loopback
+
+Host 그 자신에게 패킷을 보내기 위해 사용하며 실제 물리적 인터페이스에 할당할 수 없습니다.
+TCP/IP 설정을 테스트하기 위해 IPv6 loopback으로 핑을 보냅니다.
+::1/128 혹은 ::1로 표기합니다.
+
+4. Unspecified Address
+
+::/128 혹은 ::를 의미하며
+오직 source 주소로만 설정될 수 있습니다.
+아직 영구적인 IPv6 주소를 할당받지 못한 장치가 이 주소를 사용하는 경우가 있습니다.
+
+5. Unique Local
+
+IPv4의 사설 주소와 유사합니다.
+FC00::/7에서 FDFF::/7의 범위를 가집니다.
+
+6. Embedded
+
+IPv4 compatible 주소를 의미합니다.
+
+## Address Allocation
+
+IANA는 2000::/3을 IPv6 unicast를 위한 초기 주소로 할당했습니다.
+이제 각 지역의 registry는 /12 prefix를 IANA로부터 할당받고
+이를 다시 /32 prefix로 나누어 ISP에게 제공합니다.
+end customer(site)에게는 /48 prefix, LAN에는 /64 prefix를 할당합니다.
+
+## SLAAC(Stateless Address AutoConfiguration)
+
+호스트는 Router Solicitation 메세지를 발송합니다.
+라우터는 이에 응답하여 Router Advertisement 메세지를 발송하는데요.
+
+여기에는 prefix(/64)인 OUI(Organizationally Unique Identifier)와 기본 라우터 주소를 포함합니다.
+
+이제 장치는 EUI-64(Extended Unique Identifire - 64bit)라 하여 자신의 48 bits 길이 MAC 주소에 reserved 값 FFFE을 상위에 삽입하여 고유한 Global Unicast 주소를 확보하게 됩니다.
+
+![alt text](/blog/ipv6/image-5.png)
