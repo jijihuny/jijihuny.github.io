@@ -1,0 +1,199 @@
+---
+title: "KNN과 Data Split"
+date: 2024-04-23
+tags: ["Machine Learning", "Deap Learning"]
+---
+
+## Overview
+
+만약 어떤 사진을 보고 고양이, 개, 배 중에 하나로 분류를 할려면 어떻게 해야할까요?
+
+![alt text](/blog/what_is_machine_learning/image-2.png)
+
+우리에겐 경험적으로 너무도 간단한 일입니다만,
+
+이것을 수학적으로 혹은 알고리즘을 통해 해결하는 건 간단한 문제가 아닙니다.
+
+![alt text](/blog/what_is_machine_learning/image-3.png)
+
+우선 이미지는 수학적으로 $RGB \times W \times H$ 크기의 텐서로 표현됩니다.
+
+사람과 달리 컴퓨터에겐 이미지는 그저 $[0, 255]$ 범위로 이루어진 여러 개의 숫자일 뿐입니다.
+
+![alt text](/blog/what_is_machine_learning/image-4.png)
+
+또한 사람에겐 약간의 시점 변화만 생기더라도 컴퓨터의 입장에선 모든 픽셀에 변화가 생기게 됩니다.
+
+![alt text](/blog/what_is_machine_learning/image-5.png)
+
+만약 대상 객체가 배경에 섞여버리면 객체와 배경 사이의 픽셀값 구분이 쉽지 않을 겁니다.
+
+![alt text](/blog/what_is_machine_learning/image-6.png)
+
+조명의 차이에 의해서도 객체가 크게 달라집니다.
+
+![alt text](/blog/what_is_machine_learning/image-7.png)
+
+대상이 아예 가려질 수도 있습니다.
+
+![alt text](/blog/what_is_machine_learning/image-8.png)
+
+만약 클래스의 범위가 너무 넓으면 어떡할까요?
+
+![alt text](/blog/what_is_machine_learning/image-9.png)
+
+이렇듯 이미지 분류 문제는 명확히 정의하여 해결하기는 쉽지 않아보입니다.
+
+이에 등장하는 접근법이 Data-Driven Approach인데요.
+
+요지는
+1. 우리가 알고 있는 입력과 출력 데이터들을 모아
+2. 이를 학습한 모델을 만들고
+3. 새로운 입력에 대해 출력을 얻자는 겁니다.
+
+오늘은 이미지 분류 문제와 K-NN을 통해 기초적인 형태의 Data-Driven Approach를 살펴보겠습니다.
+
+## Nearest Neighbor
+
+만약 어떤 라벨(고양이, 개, ..)를 가지고 있는 다수의 이미지를 통해 새로운 이미지에 대해서 라벨을 예측하려 한다면,
+
+가장 간단한 형태는 무엇이 될까요?
+
+아마 가장 가까운 데이터를 하나 찾아보는 것이 제일 간단할 겁니다.
+
+Nearest Neighbor(가장 가까운 이웃) Classifier도 이런 아이디어에 착안합니다.
+
+
+```python
+
+def train(images, labels):
+    # memorize all data and labels
+    model = [images, labels]
+    return model
+
+def predict(model, test):
+    # predict the nearest image's label
+    distance = INF
+    label = None
+    for i, l in zip(model):
+        if distance > dist(i, test):
+            label = l
+
+    return label
+```
+
+여기서 학습은 O(1), 예측은 O(N)이 걸리게 되는데요.
+
+모델의 성능을 바꿀 수 있는 요인으로 Distance Metric이 있습니다.
+
+간단히 아래와 같이 distance를 정의할 수 있는데요.
+![alt text](/blog/what_is_machine_learning/image-10.png)
+
+위와 같은 형식의 distance metric을 아래와 같이 일반화하여 정의할 수 있는데요.
+
+$$
+d_n(I_1, I_2) = (\sum_p |I_1^p - I_2^p |^n)^{1/n}
+$$
+
+이제 여기서 n=1이면 L1(Manhattan) distance, n=2이면 L2(Euclidean) distance 등으로 부릅니다.
+
+다시 돌아가 distance가 모델의 성능을 결정할 수 있다고 말씀드렸습니다.
+
+이러한 요인을 Hyperparameter라고 부릅니다.
+
+L1? L2? L3? 어떤 distance를 고르느냐에 따라 모델 알고리즘의 성능이 달라집니다.
+
+혹은 아예 새로운 distance를 정의할 수도 있습니다.
+
+hyperparameter는 어떤 문제냐에 따라 최적값이 항상 달라집니다.
+
+따라서 모든 parameter를 검증해보는 것이 제일 좋습니다.
+
+이제 새로운 hyperparameter를 하나 추가할 겁니다.
+
+NearestNeighbor는 가장 가까운 이웃을 하나 뽑아 라벨을 결정하는데요.
+
+이는 너무나 단순하여 신뢰성 있는 예측을 기대하기가 어렵습니다.
+
+이에 등장한 것이 바로 K-Nearest Neighbor입니다.
+
+## K-NearestNeighbor
+
+K-NearestNeighbor(K-NN)은 새로운 hyperparameter K를 도입합니다.
+
+1. 이제 K개의 가장 가까운 이웃 샘플을 뽑습니다.
+2. K개의 샘플 중 가장 많은 수의 라벨을 뽑아 테스트 데이터의 라벨을 예측합니다.
+
+![alt text](/blog/what_is_machine_learning/image-11.png)
+
+이제 가장 적절한 K를 찾을 차례인데요.
+
+적절한 K를 찾기 위해선 모델의 성능을 측정할 수 있어야 합니다.
+여기선 모델의 성능은 테스트 데이터에 대한 라벨 예측 성공률로 두겠습니다.
+
+일반적으로 모델은 많은 샘플 데이터를 학습할 수록 성능이 좋아집니다.
+
+그러나 우리가 보유한 샘플은 유한하기 때문에 모든 데이터를 학습에 이용할 수는 없는데요.
+
+## Data Split
+
+![alt text](/blog/what_is_machine_learning/image-13.png)
+
+만약 모든 데이터를 학습에 이용한다면 테스트도 학습 데이터를 이용해야 합니다.
+
+그렇다면 K = 1일 때 테스트 데이터의 Nearest는 자기 자신이 되기 때문에 라벨 예측성공률 100%를 자랑하는 모델이 만들어져버립니다.
+
+K를 높여도 성능이 좋아질 일은 없습니다.
+
+![alt text](/blog/what_is_machine_learning/image-14.png)
+
+따라서 적절한 아이디어는 학습 데이터와 테스트 데이터를 분리하는 것 입니다.
+
+그러나 이 경우도 아직 남아있는 문제가 있는데요.
+
+만약 K를 선택한 이후 Test 데이터에 대한 성공률이 높다면 모델이 성공적으로 학습된 것일 겁니다.
+
+그런데 만약 주어진 K에 대해 테스트 성능이 안좋다면 어떨까요?
+테스트 성능이 좋을 때까지 K를 수정하며 최적의 K를 찾기 위해 노력하게 됩니다.
+
+그렇다면 이 때 K에 대한 테스트는 모델의 성능을 평가하기에 적절한 걸까요?
+
+테스트는 직접적으로 모델이 학습한 데이터가 아니지만, 모델은 테스트 데이터의 성공률을 높이기 위한 방향으로 파라미터가 설정되게 됩니다.
+
+이러한 테스트는 모델의 과적합(Overfitting)을 검증하지 못하는데요.
+
+과적합이란 모델이 학습 데이터를 과하게 학습하여 새로운 데이터에 대해선 정확한 예측을 하지 못하게 되는 것을 말합니다.
+
+ 이를 예방하기 위한 첫 번째 방법으로 아래와 같이 test와 validation을 위한 데이터를 분리할 수 있습니다.
+
+![alt text](/blog/what_is_machine_learning/image-15.png)
+
+![alt text](/blog/what_is_machine_learning/image-16.png)
+
+training 데이터는 모델이 학습하는 데이터가 되고 validation 데이터를 통해 모델이 언제까지 학습할지를 결정합니다.
+
+마지막으로 test 데이터를 통해 성능을 측정함으로써 모델이 안정적으로 실제 세계를 반영하는지 검증하게 됩니다.
+
+그러나 이 방법의 경우 적은 데이터를 보유했을 때는 학습데이터의 개수가 줄어들어 좋은 모델을 만들기 어려워질 수 있습니다.
+
+이럴 때 사용할 수 있는 방법으로는 K Folds Cross Validation이 있는데요.
+
+## K-Folds Cross Validation
+
+K-Folds Cross Validation은 적은 수의 데이터셋을 가지고 있을 때 효과적인 데이터 분할 방법입니다.
+
+요지는 데이터를 K개로 분할하고 그 중 1개를 Test 샘플로 하여 K번 학습한 결과를 평균내는 것 입니다.
+
+![alt text](/blog/what_is_machine_learning/image-17.png)
+
+만약 K-NN과 사용한다면, 어떤 K(K-NN)에 대해서 K(K-Folds Cross Validation)번의 테스트 데이터 셔플링을 통해 결과값을 평균낸 것이 모델의 성능이 됩니다.
+
+![alt text](/blog/what_is_machine_learning/image-18.png)
+
+그래프의 x 축은 K(K-NN)를 나타내고 각 점들은 K에 대해 5번의 cross validation을 수행한 결과입니다.
+
+수직으로 이어진 선은 표준편차이며, 각 평균을 잇는 가로선이 그려져 있습니다.
+
+이를 통해 적은 데이터로도 좀 더 신뢰성 있게 성능을 측정하고 파라미터를 결정할 수 있다는 점이 K-Folds Cross Validation의 장점입니다.
+
+대신 매번 데이터 분할만큼 테스트 샘플을 바꿔가며 학습을 진행하여 학습 진도가 느려질 수 있다는 단점이 있습니다.
