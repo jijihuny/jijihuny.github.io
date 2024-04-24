@@ -1,0 +1,153 @@
+---
+title: Classifier와 Optimization
+date: 2024-04-24
+tags: ["Machine Learning", "Deap Learning"]
+---
+
+## Overview
+
+Multilabel classifier는 각 class에 대한 점수를 출력하는데요.
+
+![alt text](/blog/optimization/image.png)
+
+이 때 입력값이 출력에 반영되는 차수에 따라 Linear, Quadratic, Cubic Classifier 등으로 칭하게 됩니다.
+
+![alt text](/blog/optimization/image-1.png)
+
+모든 Classifier의 궁극적 목적은 적절한 class에 대한 점수를 높이고,
+틀린 class에 대한 점수를 낮추어 알맞은 class가 최대 점수를 가지도록 하는 것 입니다.
+
+![alt text](/blog/optimization/image-2.png)
+
+위 그림과 같이 어떤 샘플에 대해서 feed-forward(모델에 샘플을 입력)하여 나온 출력값을 실제 class와 비교하여 Loss를 얻을 수 있는데요.
+
+이제 Classfier가 원하는 class에 대한 점수를 최대로 하기 위해 Loss값을 최소화하도록 설계할 것 입니다.
+
+## SVM(Support Vector Machine) Classifier
+
+![alt text](/blog/optimization/image-3.png)
+
+만약 3개의 샘플과 3개의 클래스가 있고 스코어가 위와 같이 나왔다고 가정합시다.
+
+Loss는 classifier가 현재 얼마나 잘하고 있는지에 대해서 나타내주는 metric이어야 합니다.
+
+즉, Loss가 크면 Classfier가 부적절한 방향으로 학습했다는 것이고, Loss가 작아지는 방향으로 학습해야 하는 겁니다.
+
+따라서 Loss를 어떻게 정의하는가는 모델에 있어 매우 중요한 부분인데요.
+
+Multilabel Classifier를 위한 Loss를 정의하는 첫 번째 방법은 바로 SVM입니다.
+
+SVM의 아이디어는 각 데이터 그룹을 분류하는 초평면(hyper plane)을 구성하는 것 입니다.
+
+이에 대해 알아보기 위해 우선 binary classification의 관점에서 생각해보도록 하겠습니다. 
+
+주어진 샘플 $\mathcal{D} = \{(x_i, y_i) | x_i \in \R^p, y_i \in \{1, -1\}\}_{i=1}^n$에 대해서
+
+데이터 집합을 분리하는 초평면은 다음과 같이 나타낼 수 있습니다.
+
+$ \vec{w} \cdot \vec{x} - b = 0 $
+
+이제 여기서 주어진 샘플 중 $y_i = 1, -1$를 나타내는 점들 각각에서 초평면과 가장 가까운 점을 각각 $X^+, X^-$로 두었을 때, 각 점을 서포트벡터라고 말합니다.
+
+이제 초평면과 평행하고, 각 초평면을 지나는 평면을 적당히 아래와 같이 둘 수 있는데요.
+
+$$
+\begin{split}
+(1) \quad &\vec{w} \cdot \vec{x} - b = \vec{w} \cdot X^+ = 1\\
+(2) \quad &\vec{w} \cdot \vec{x} - b = \vec{w} \cdot X^- = -1
+\end{split}
+$$
+
+이 떄, 두 평면 사이의 영역을 마진(Margin)이라고 부릅니다.
+
+이제 $y_i = 1$를 라벨로 가지는 샘플의 경우
+
+$\vec{w} \cdot \vec{x_i} - b \geq 1$
+
+$y_i = -1$를 라벨로 가지는 샘플의 경우
+
+$\vec{w} \cdot \vec{x_i} - b \leq -1$
+로 임을 쉽게 알 수 있습니다.
+
+이제 여기서 두 식의 양변에 $y_i$를 곱하면 아래와 같이 하나의 식으로 정리되는데요.
+
+$t = y_i(\vec{w} \cdot \vec{x_i} - b) \geq 1$
+
+- 여기서 $t \gt 1$이라는 것은 값의 예측이 올바르게 되었다는 것을 뜻합니다.
+- 만약 $1 \gt t \gt -1$이라면 초평면의 구성에서 입력값이 마진에 속해버렸다는 것을 뜻합니다.
+따라서 이 경우에도 값이 틀린게 됩니다.
+- 마지막으로 $-1 \geq t$일 경우 예측이 완전히 틀린 경우가 됩니다.
+
+이 떄 hinge loss는 $max(0, 1 - t)$로 표현되는데요.
+
+이는 정답(class)를 맞추었을 경우 loss를 0으로, 만약 틀렸을 경우 정답 영역으로부터 멀어질 수록 큰 loss를 부여하는 것을 의미합니다.
+
+이제 다시 multiclass SVM에 대해서 loss를 정의해볼 겁니다.
+
+우선 각 class $n=1, 2, ...$에 대해 각각 초평면을 구하는 것을 목표로 합니다.
+
+이렇게 구해진 초평면은 해당 클래스를 정답으로, 나머지 모든 클래스를 오답으로 분류하게 됩니다.
+
+이제 어떤 샘플 $i$에 대해 정답 클래스 $y_i$와 임의의 클래스 $j!=y_i$가 있을 때,
+
+샘플은 클래스 $y_i$에 대한 정답 초평면 너머에 있어야 합니다.
+
+$\vec{w_{y_i}} \cdot \vec{x_i} - b_{y_i} \geq 1 $
+
+또한 클래스 $j$에 대해서는 오답 초평면 너머에 있어야 할 겁니다.
+
+$\vec{w_{j}} \cdot \vec{x_i} - b_{j} \leq -1 $
+
+이제 아래와 같이 쓸 수 있는데요.
+
+$\vec{w_{y_i}} \cdot \vec{x_i} - \vec{w_{j}} \cdot \vec{x_i} \geq 2 + b_{y_i} + b_j$
+
+이 부등식이 만족하지 않는다면, 적어도 두 예측 $y_i$를 오답으로 예측했거나 $j$를 정답으로 예측했다는 것을 알 수가 있습니다.
+
+1, -1은 모두 적당히 두었던 값이고, 우리의 목표는 적절한 Loss를 내어 학습을 활성화하는 것 입니다.
+
+따라서 아래와 같이 두면
+
+$\vec{w_{y_i}} \cdot \vec{x_i} - \vec{w_{j}} \cdot \vec{x_i} \geq \Delta$
+
+binary classifier에서 말했던 hinge loss를 사용하기 적절하겠죠?
+
+따라서 class $y_i, j$에 의한 loss는
+
+$\max(0, \vec{w_j} \cdot \vec{x_i} - \vec{w_{y_1}} \cdot \vec{x_i} + \Delta)$
+
+와 같이 둘 수 있습니다.
+
+또한 모든 초평면에 대한 오차를 보정하기 위해 샘플 i에 대한 Loss를 아래와 같이 정의하게 됩니다.
+
+$\mathcal{L}_i = \sum_{j \neq y_i} \max(0, \vec{w_j} \cdot \vec{x_i} - \vec{w_{y_1}} \cdot \vec{x_i} + \Delta)$
+
+## Softmax Classifier
+
+SVM은 각 클래스에 대해서 점수를 얻어 최대값을 가지는 클래스를 선택하는 방식이었습니다.
+
+그런데 이걸 각 클래스에 대한 확률로 해석할 수는 없을까요?
+
+이러한 목적으로 설계된 것이 Softmax Classifier입니다.
+
+스코어가 다음과 같이 주어졌을 때,
+
+$s = f(x_i; W)$
+
+각 클래스에 대한 확률은 다음과 같이 정의합니다.
+
+$P(Y=k|X=x_i) = \frac{e^{s_k}}{\sum e^{s_j}}$
+
+![alt text](/blog/optimization/image-5.png)
+
+따라서 모든 클래스에 대한 점수는 최종적으로 확률로 나오게 됩니다.
+
+그럼 Loss는 어떻게 구할 수 있을까요?
+
+![alt text](/blog/optimization/image-6.png)
+
+여기서 위와 같이 출력값은 onehot - encoding 벡터라 하여 정답 클래스 1, 오답 클래스 0인 벡터값으로 표현됩니다.
+
+따라서 cross-entropy에 적용하면, 정답 클래스에 대해서 log값을 적용해 오차율을 구하기 용이해집니다.
+
+$\mathcal{L}_i = - \sum_i L_j \log(S_j)$
