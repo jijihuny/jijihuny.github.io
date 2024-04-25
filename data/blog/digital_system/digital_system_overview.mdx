@@ -1,0 +1,72 @@
+---
+title: "조합논리회로(Combinational Logic Circuit)와 순차논리회로(Sequential Logic Circuit)"
+date: 2024-04-24
+tags: ["디지털 시스템"]
+---
+
+
+우리가 다루는 컴퓨터는 매우매우 복잡한 시스템입니다.
+
+아마 컴퓨터의 모든 디테일을 이해하는 사람은 극히 일부일 겁니다.
+
+컴퓨터의 설계는 크게 software design / hardware(digital) design / analog design으로 나눌 수 있습니다.
+
+![alt text](/blog/digital_system_overview/image.png)
+
+마치 OSI 7계층처럼, 각 하위 계층은 상위 계층에게 일종의 추상화된 인터페이스를 제공합니다.
+
+하위 계층의 디테일이 숨겨지는 것이죠.
+
+그 중에서도 우리가 다룰 것은 디지털 시스템의 설계입니다.
+*디지털 시스템은 불연속적인 입력값과 불연속적인 내부 상태를 가지고, 불연속적인 출력값을 생성하는 시스템*입니다.
+
+![alt text](/blog/digital_system_overview/image-1.png)
+
+가장 기본적인 디지털 시스템은 바로 **"Gate"**입니다.
+
+![alt text](/blog/digital_system_overview/image-2.png)
+
+Gate는 1개 이상의 Binary 입력을 받아 1개의 Binary 출력을 생성하는 boolean function입니다.
+
+위에서 계층도를 보면 알 수 있듯, 다이오드, 트랜지스터를 통해 구현되며 오늘날은 MOSFET(Metal-Oxide-Semiconductor field-effect transistor)를 통해 구현됩니다.
+
+따라서 Analog-Digital 시스템의 경계면을 나타내기도 합니다.
+
+Gate는 디지털 시스템의 basis가 되는 역할이기 때문에 매우 단순한 동작을 수행하고 내부의 상태를 지니지 않습니다.
+
+디지털 시스템은 내부의 상태에 따라 몇 가지 분류로 나눌 수 있는데요.
+
+## Types of Digital Systems
+
+내부의 상태를 지니지 않는 시스템을 Combinational Logic System이라 부릅니다.
+Combinational Logic은 내부 상태를 가질 필요가 없기 때문에 출력이 오직 입력에 의해서 걸졍됩니다. 각 Gate는 가장 기본적인 Combinational Logic System입니다.
+반면 상태를 가지면 Sequential Logic System으로 정의하는데요.
+
+---
+
+**Definition**  *Combinational Logic & Sequential Logic System* <br/>
+
+어떤 디지털 시스템이 상태를 가지지 않을 경우 Combinational Logic System이라 정의하고,
+$$
+Output_n = F(Input_n) 
+$$
+
+상태를 가지는 시스템을 Sequential Logic System이라 정의한다.
+
+상태는 이전의 상태에 의해 정해지며 새로운 상태는 이전의 상태와 현재 입력값에 의해 결정된다.
+
+$$
+\begin{split}
+State_n &= G(State_{n-1}, Input_n)\\
+Output_n &= F(State_n) = F(State_{n-1}, Input_n) = F(Input_1, Input_2, \dots, Input_n) 
+\end{split}
+$$
+
+또한 새로운 상태가 불연속적인 시간에 발생하는 이벤트에 의해 업데이트될 경우 synchronous, 새로운 입력값이 주어지는 즉시 업데이트될 경우 asynchronous sequential logic이라 정의한다.
+
+---
+
+거의 모든 시스템은 Sequential Logic System으로 볼 수 있는데요.
+
+Combinational Logic System은 보통 로직의 가장 기초적인 단위로서 컴퓨터를 만들기 위한 요소로 작용합니다.
+
