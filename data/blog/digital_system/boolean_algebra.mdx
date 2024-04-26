@@ -1,0 +1,170 @@
+---
+title: "불리언 대수(Boolean Algebra)"
+date: 2024-04-25
+tags: ["디지털 시스템"]
+---
+
+## Overview
+
+불리언 대수는 논리회로의 설계를 위해 사용하는 특수한 대수 구조를 말합니다.
+
+불리언 대수는 $\{0, 1\}$, $\{True, False\}$ 등 오로지 두 개의 원소로 이루어진 집합과 이 집합에서 정의되는 특수한 연산 And($+, \land$)와 Or($\cdot, \lor$), 마지막으로 Not(~, $\neg$)로들로 이루어진 구조입니다.
+
+불리언 대수 구조는 다음의 공리가 적용되는데요.
+
+---
+
+**Axioms** 
+
+$\forall a, b, c \in \{0, 1\}$
+
+$$
+\begin{alignat*}{3}
+&a \lor (b \lor c) = (a \lor b) \lor c  \quad\quad &&a \land (b \land c) = (a \land b) \land c \quad &&\text{(associativity)} \\
+
+&a \lor b = b \lor a \quad\quad &&a \land b = b \land c \quad &&\text{(commutativity)} \\
+
+
+&a \lor (a \land b) = a \quad\quad &&a \land (a \lor b) = a \quad &&\text{(absortion)} \\
+
+&a \lor 0 = a \quad\quad &&a \land 1 = a \quad &&\text{(identity)} \\
+
+&a \lor (b \land c) = (a \land b) \lor (a \land c) \quad\quad &&a \land (b \lor c) = (a \land b) \lor (a \land c) \quad &&\text{(distributivity)}\\
+
+&a \lor \neg{a} = 1 \quad\quad &&a \land \neg{a} = 0 \quad &&\text{(complements)}\\
+
+\end{alignat*}
+$$
+
+---
+
+이를 통해 연산들을 정의할 수 있습니다.
+
+---
+
+**Definition** $\lor, \land, \neg$
+
+$\forall a, b \in \{0, 1\}$
+
+$$
+\begin{split}
+a \lor b &= 
+
+\begin{dcases}
+0 &\text{if} \quad a = b = 0\\
+1 &\text{else}
+\end{dcases}\\
+\\
+a \land b &=
+
+\begin{dcases}
+1 &\text{if} \quad a = b = 1\\
+0 &\text{else}
+\end{dcases}\\
+\\
+
+\neg{a} &=
+
+\begin{dcases}
+1 &\text{if} \quad a = 0\\
+0 &\text{else}
+\end{dcases}\\
+
+\end{split}
+$$
+
+---
+
+
+또한 불리언 구조에서는 아주 유용한 성질인 드 모르간 법칙이 있는데요.
+
+---
+
+**Theorem** *De Morgan's Law*
+
+$\forall a, b \in \{0, 1\}$,
+
+(1) $\neg{(a \lor b)} = \neg{a} \land \neg{b}$
+
+(2) $\neg{(a \land b)} =  \neg{a} \lor \neg{b}$
+
+**Proof**
+
+(1)
+
+$a \lor b$와 $\neg{a} \land \neg{b}$가 complements를 만족하는지 보일 것 입니다.
+
+$$
+\begin{split}
+(a \lor b) \lor (\neg{a} \land \neg{b}) &= a \lor (b \lor (\neg{a} \land \neg{b})) \quad \because{associativity}\\
+&= a \lor ((b \lor \neg{a}) \land (b \lor \neg{b})) \quad \because{distributivity}\\
+&= a \lor ((b \lor \neg{a}) \land 1) \quad \because{complements}\\
+&= a \lor (b \lor \neg{a}) \quad \because{identity}\\
+&= a \lor (\neg{a} \lor b) \quad \because{commutativity}\\
+&= (a \lor \neg{a}) \lor b \quad \because{associativity}\\
+&= 1 \lor b \quad \because{complements}\\
+&= 1 \quad \because{identity}
+\end{split}
+$$
+
+$$
+\begin{split}
+(a \lor b) \land (\neg{a} \land \neg{b}) &= ((a \lor b) \land \neg{a}) \land \neg{b} \quad \because{associativity}\\
+&= ((a \land \neg{a}) \lor (b \land \neg{a})) \land \neg{b} \quad \because{distributivity} \\
+&= (0 \lor (b \land \neg{a})) \land \neg{b} \quad \because{complements} \\
+&= (b \land \neg{a}) \land \neg{b} \quad \because{identity}\\
+&= (\neg{a} \land b) \land \neg{b} \quad \because{commutativity}\\
+&= \neg{a} \land (b \land \neg{b}) \quad \because{associativity}\\
+&= \neg{a} \land 0 \quad \because{complements}\\
+&= 0 \quad \because{identity}
+\end{split}
+$$
+
+따라서 $a \lor b$와 $\neg{a} \land \neg{b}$이 complements 공리를 만족합니다.
+
+(2) (1)과 거의 동일하게 보일 수 있습니다.
+
+---
+
+따라서 이를 통해 boolean algebra 구조에서 쌍대성이 정의됩니다.
+
+---
+
+**Duality**
+
+$F(A, \lor, \land)$ $\iff$ $\neg{F(\neg{A}, \land, \lor)}$
+
+---
+
+공리들을 잘 살펴보면, 하나의 규칙마다 두 개의 식이 정의되는데 사실은 한 쪽의 식에 $\neg$를 적용해 나머지 한 쪽의 식이 유도된다는 것을 알 수 있습니다.
+
+이제 몇 가지 성질을 더 알아보도록 하겠습니다.
+
+---
+
+**Properties**
+
+$\forall a, b, c \in \{0, 1\}$
+
+$$
+\begin{alignat*}{}
+&a \lor a = a \quad\quad &&a \land a = a \quad&&\text{(idempotency)}\\
+
+&(a \land b) \lor (a \land \neg{b}) = a
+&&(a \lor b) \land (a \lor \neg{b}) = a
+&&\text{(adjacency)}\\
+
+&a \lor (\neg{a} \land {b}) = a \lor b
+&&a \land (\neg{a} \lor {b}) = a \land b
+&&\text{(simplicity)}\\
+
+&(a \land b) \lor (\neg{a} \land c) \lor (b \land c) = (a \land b) \lor (\neg{a} \land c)
+&&(a \lor b) \land (\neg{a} \lor c) \land (b \lor c) = (a \land b) \lor (\neg{a} \land c)
+&&\text{(consensus)}
+\end{alignat*}\\
+$$
+
+---
+
+(idempotency)는 absortion과 identity를,
+(adjacency), (simplicity), (consensus)는 distributivity와 complements를 이용해 유도할 수 있습니다.
