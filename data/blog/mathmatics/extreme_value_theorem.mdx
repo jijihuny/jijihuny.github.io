@@ -1,0 +1,86 @@
+---
+title: 최대최소정리
+date: 2024-06-03
+tags: [해석학]
+---
+
+## 최대최소정리
+
+먼저 닫힌 구간에서 연속인 함수의 상이 유계임을 보일 것이다.
+
+---
+__Lemma__ 닫힌 구간 $I = [a, b]$에서 연속인 함수 $f$는 $I$에서 유계이다.
+
+__Proof__
+
+다음과 같은 집합
+$$
+B = \{p \in [a, b]| f([a, p]) \space \text{is bounded}\}
+$$
+을 정의하자.
+
+$a \in B$이고, $b$가 $B$의 상계이므로 유한한 $s = \sup B$가 정의된다.
+
+우선,
+
+$$
+\exists \delta \gt 0 \quad \text{s.t}\\
+0 \lt x - a \lt \delta \implies |f(x)| - |f(a)| \leq |f(x) - f(a)| \lt 1
+$$
+이므로 $|f(x)| \lt |f(a)| + 1$이고, $f$가 $[a,s)$에서 유계이다.
+
+따라서 $|f(x)| \lt \max(|f(a)|, |f(a + \delta)|) + 1$이고, $a \lt a + \delta \leq s$이다.
+
+이제 $a \lt s \leq b$이므로 $s \lt b$라 가정하자. 그러면 함수의 연속성에 의해
+
+$$
+\exists \delta' \gt 0 \quad \text{s.t}\\
+|x - s| \lt \delta' \implies |f(x)| - |f(s)| \leq |f(x) - f(s)| \lt 1 
+$$
+이고, $x \in (s - \delta', s+\delta')$에서 $|f(x)| \lt |f(s)| + 1$이다.
+
+그러면 $x \in [a, s + \frac{\delta'}{2}]$에서 $f$가 유계임을 알 수 있고, 이는 $s$의 상한 조건에 모순이다. 따라서 $s = b$.
+
+---
+
+--- 
+__Theorem__ 닫힌 구간 $I=[a, b]$에서 연속인 함수 $f: I \rightarrow \R$은 $I$에서 최대값과 최소값을 가진다.
+
+__Proof__
+
+Lemma에 의해 $f(I)$가 유계인 실수집합임을 안다.
+따라서 
+$$
+M = \sup f(I)
+$$
+라고 두고,
+
+$\forall x \in I$, $f(x) \lt M$이라 가정하자.
+
+그러면 새롭게 정의한 함수
+$$
+g(x) = \frac{1}{M - f(x)}
+$$
+도 여전히 구간 $I$에서 연속함수($f(x) \lt M$이므로)이다.
+
+따라서 다시 Lemma에 의해
+
+$$
+N = \sup g(I)
+$$
+로 두면,
+
+$$
+\forall x \in I,\\
+g(x) \lt N \iff f(x) \lt M - \frac{1}{N}
+$$
+
+그런데, 이는 $M$이 $f(I)$의 최소상계란 가정에 모순이므로 가정이 틀렸고,
+$$
+\exists x_0 \in I \quad \text{s.t} \quad f(x_0) = M = \max f(I)
+$$
+이다.
+
+이제 $\inf f(I) = - \sup (-f(I)), \min f(I) = -\max (-f(I))$로 두어 최소값도 증명한다.$\square$
+
+---
