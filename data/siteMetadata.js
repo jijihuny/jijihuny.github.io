@@ -1,14 +1,14 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Abraxas',
+  title: 'Jijihuny\'s blog',
   author: 'Jijihuny',
-  headerTitle: 'Abraxas',
+  headerTitle: '',
   description: '자기개발',
   language: 'ko-kr',
   theme: 'system', // system, dark or light
   siteUrl: 'https://jijihuny.github.io',
   siteRepo: 'https://github.com/jijihuny/jijihuny.github.io',
-  siteLogo: '/static/images/logo.png',
+  // siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/twitter-card.png',
   email: 'dlwlgns2792@gmail.com',
   github: 'https://github.com/jijihuny',
