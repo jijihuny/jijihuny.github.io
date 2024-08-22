@@ -23,7 +23,11 @@ module.exports = {
       },
       fontFamily: {
         sans: ['var(--font-space-grotesk)', ...fontFamily.sans],
-        'latin-roman': ['LMRoman10-Regular', ...fontFamily.serif]
+        'latin-roman': [
+          'var(--font-latin-roman-regular)',
+          'var(--font-nanum-myeongjo)',
+          ...fontFamily.serif,
+        ],
       },
       colors: {
         primary: colors.pink,

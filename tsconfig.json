@@ -61,5 +61,18 @@
   ],
   "mdx": {
     "checkMdx": true,
+    "plugins": [
+      "remark-extract-frontmatter",
+      "remark-gfm",
+      "remark-code-titles",
+      "remark-math",
+      "remark-img-to-jsx",
+      "rehype-slug",
+      "rehype-autolink-headings",
+      "rehype-katex",
+      "rehype-citation",
+      "rehype-prism-plus",
+      "rehype-preset-minify"
+    ]
   }
 }

@@ -14,9 +14,13 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:jsx-a11y/recommended',
     'plugin:prettier/recommended',
+    'plugin:mdx/recommended',
     'next',
     'next/core-web-vitals',
   ],
+  settings: {
+    "mdx/code-blocks": true
+  },
   parserOptions: {
     project: true,
     tsconfigRootDir: __dirname,
