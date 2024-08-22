@@ -23,6 +23,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['var(--font-space-grotesk)', ...fontFamily.sans],
+        'latin-roman': ['LMRoman10-Regular', ...fontFamily.serif]
       },
       colors: {
         primary: colors.pink,
