@@ -1,7 +1,8 @@
 import 'css/tailwind.css'
 import 'pliny/search/algolia.css'
 
-import { Space_Grotesk } from 'next/font/google'
+import { Space_Grotesk, Nanum_Myeongjo } from 'next/font/google'
+import localFont from 'next/font/local'
 import { Analytics, AnalyticsConfig } from 'pliny/analytics'
 import { SearchProvider, SearchConfig } from 'pliny/search'
 import Header from '@/components/Header'
@@ -15,6 +16,18 @@ const space_grotesk = Space_Grotesk({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-space-grotesk',
+})
+
+const nanum_myeongjo = Nanum_Myeongjo({
+  subsets: ['latin'],
+  display: 'auto',
+  weight: ['400', '700', '800'],
+  variable: '--font-nanum-myeongjo',
+})
+
+const latin_roman = localFont({
+  src: 'fonts/lmroman10-regular.woff',
+  variable: '--font-latin-roman-regular',
 })
 
 export const metadata: Metadata = {
@@ -61,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang={siteMetadata.language}
-      className={`${space_grotesk.variable} scroll-smooth`}
+      className={`${space_grotesk.variable} ${nanum_myeongjo.variable} ${latin_roman.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
