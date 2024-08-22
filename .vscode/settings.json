@@ -1,7 +1,7 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "files.associations": { "*.mdx": "markdown" },
+  // "files.associations": { "*.mdx": "markdown" },
   "markdown.copyFiles.destination": {
     "/data/**/*": "/public/blog/${documentBaseName}/"
   },
