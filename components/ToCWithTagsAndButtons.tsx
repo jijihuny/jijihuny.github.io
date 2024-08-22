@@ -33,7 +33,7 @@ const ToCWithTagsAndNavButtons = ({ tags, next, prev, basePath, toc }: Props) =>
     <>
       <dl
         ref={ref}
-        className="sticky top-24 pb-10 pt-6 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700"
+        className="pb-10 pt-6 xl:sticky xl:top-24 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700"
       >
         <dt className="sr-only">Authors</dt>
         <dd>
@@ -54,7 +54,7 @@ const ToCWithTagsAndNavButtons = ({ tags, next, prev, basePath, toc }: Props) =>
         </dd>
       </dl>
       <div
-        className={`sticky self-start xl:col-start-1 xl:row-start-2`}
+        className={`xl:sticky xl:col-start-1 xl:row-start-2 xl:self-start`}
         style={{ top: `calc(${height}px + 6rem)` }}
       >
         <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:divide-y">
