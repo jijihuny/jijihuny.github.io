@@ -17,7 +17,7 @@
 	// }
 	"MDX Metadata template": {
 		"scope": "mdx",
-		"prefix": "metadata",
+		"prefix": "---",
 		"body": [
 			"---",
 			"title: { type: 'string', required: true }",
@@ -32,6 +32,14 @@
     		"bibliography: { type: 'string' }",
     		"canonicalUrl: { type: 'string' }",
 			"---"
+		]
+	},
+	"scope": {
+		"scope": "mdx",
+		"prefix": "\\begin",
+		"body": [
+			"\\begin{}",
+			"\\end{}"
 		]
 	}
 }
