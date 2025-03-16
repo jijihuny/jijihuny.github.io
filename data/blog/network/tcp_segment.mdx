@@ -1,0 +1,149 @@
+---
+title: "TCP segments : 네트워크-13"
+date: 2024-06-15
+tags: [네트워크]
+---
+
+# TCP Characteristics
+
+TCP는 매우 많은 임무를 수행하는 프로토콜입니다.
+
+1. Connection-Oriented
+TCP를 통한 데이터 교환은 반드시 연결을 위한 절차를 거친 뒤에 이루어집니다.
+이것을 Handshaking이라 부르는데, 이것을 통해 상호 간에 식별을 신뢰성있게 수행할 수 있도록 보장합니다.
+
+2. Full Duplex Data
+TCP는 양방향 통신을 자유롭게 수행할 수 있습니다.
+당연한 것처럼 보이지만 대표적인 상위계층인 HTTP의 경우 반드시 request-response를 통해 통신하기 때문에 Full-Duplex 통신을 지원하지 않습니다.
+(이로 인해 short-term, long-term polling이나 Websocket 등이 등장합니다.)
+
+Full Duplex는 상호 간에 메세지 교환이 동시적(Concurrently)으로 발생하는 것을 의미합니다.
+
+3. Reliable, in-order byte stream transmission
+
+TCP 메세지는 그 자체로 순서에 관한 신뢰성있는 정보를 포함하고 있습니다.
+TCP의 메세지들은 모두 자신의 순번(sequence number)를 지니고 있기 때문에 수신 측에서 모든 메세지가 몇 번째 위치의 데이터를 포함하고 있는지 파악할 수 있습니다.
+
+4. pipelined transmission
+
+TCP 메세지는 full-duplex이지만 매 전송이 데이터전송+상대방의 데이터 수신 확인(Acknowlegment)로 이루어집니다.
+
+Acknowlegment(Ack)라는 것은 내가 몇 번째 데이터까지 잘 수신했다는 신호로 해석할 수 있고, 상대방이 내가 몇 번째 데이터까지 잘 받았고 이제 몇 번째 데이터를 송신해야하는지 해석하는 수단이 됩니다.
+
+5. Flow Control
+
+송신자는 수신자의 버퍼를 고려하여 흐름 제어를 수행합니다.
+
+6. Congestion Control
+
+혼잡 상황을 예방하기 위해 데이터 전송량을 조절합니다.
+
+
+
+# TCP Segment
+
+TCP segment의 헤더는 기본 20byte 헤더와 추가적인 optional 헤더로 구성됩니다.
+
+```cpp
+struct TCPHeader {
+    // source와 destination의 포트(process 번호, pid와는 다른 개념입니다.)
+    uint_16_t source_port;
+    uint_16_t destination_port;
+
+    // sender의 바이트스트림의 위치를 지정합니다.
+    // SYN flag가 1일 경우 연결수립 과정임을 의미하며,
+    // seq-number를 적당한 임의 숫자로 지정합니다.
+    // 이후 전송되는 데이터는 최초 seq-number로부터 상대적 차이를 통해 
+    // 위치를 식별하게 됩니다.
+    // 최초 데이터(!=헤더)와 ACK 번호는 초기 seq-number + 1로 정의됩니다.
+    uint_32_t sequence_number;
+
+    // 수신측에서 지금까지 수신한 데이터 번호(seq) + 1로
+    // 다음으로 수신하기를 기대하는 번호로 생각할 수 있습니다.
+    // 만약 데이터 100byte를 받았다면 이제 101번째 데이터를 전송해라!라고 말하는 의미입니다.
+    // 이 때 반드시 ACK flag가 1이어야 합니다.
+    // 따라서 ACK = 1이고 ack-num이 담긴 메세지는 상대방이 < ack-num까지의 데이터를 모두 잘 수신했다는 보증으로 생각해도 됩니다.
+    uint_32_t acknowledgment_number;
+
+    // 헤더 길이로 TCP 헤더는 32-bit word이기 때문에 32-bit 단위로 길이를 설정합니다.
+    // 헤더 최소길이는 20byte=160-bit이기 때문에 최소값 5, 최대값은 60byte=480-bit이기 때문에 15입니다.
+    uint_8_t header_length : 4;
+
+    // for future use
+    uint_8_t unused : 6 = 0; 
+
+    struct {
+        // UrgentPointer 필드가 작동 중임을 명시합니다.
+        bool urg;
+        // Ackowlegment 필드가 작동 중임을 명시합니다.
+        bool ack;
+        // 수신측에게 버퍼 데이터를 측시 어플리케이션(process)으로 보내기를(push) 요청합니다.
+        bool psh;
+        // connection reset
+        bool rst;
+        // synchronize sequence number. 연결 수립에서 서로 첫 번째 패킷에서만 사용되어 sequence number를 초기화합니다.
+        bool syn;
+        // 송신측의 마지막 패킷을 의미하여 연결 종료
+        bool fin;
+    } flags;
+
+    // 수신 윈도우 크기로 A가 B에게 메세지를 보내며 나 이만큼 데이터 받을 수 있어!
+    // 이렇게 일종의 수신 버퍼 가용량을 알려줍니다.
+    // 16bit이므로 크기가 제한되어 현대 인터넷에선 scale factor란 옵션을 통해
+    // 수신 윈도우 크기를 더 크게 설정할 수 있습니다.
+    // flow control(사용자 버퍼 크기 초과로 인한 손실 예방)
+    uint_16_t receive_window;
+
+    // tcp 헤더와 payload, IP pseudo-header의 무결성을 검증합니다.
+    // IP pseudo-header는 IP 헤더 중 s-d 주소와 protocol field, tcp length를 포함하는 가상의 헤더로 checksum 검증을 위해 생성하는 헤더를 의미합니다.
+    uint_16_t internet_checksum;
+
+    // 마지막 urgent data byte의 위치(offset from sequence number)
+    uint_16_t urgent_data_pointer;
+
+    struct TCPOptionalHeader options;
+}
+```
+
+---
+
+# TCP Options
+
+## Maximum Segment Size(MSS)
+
+최초 연결수립에서 syn 패킷과 함께 MSS 옵션을 통해 수신할 수 있는 최대 패킷 사이즈를 설정합니다.
+
+---
+
+## Window Scaling
+
+window size 필드는 최대 64KB 값을 지정할 수 있습니다.
+이는 상당히 작은 크기이기 때문에 scaling factor를 통해 새로운 윈도우 사이즈를 정의할 수 있습니다.
+
+이 때
+$$
+NewWindow = WindowSize \times 2^{ScaleFactor}
+$$
+로 계산됩니다.
+
+이를 통해 송신자는 자신의 최대 버퍼크기를 최대 1GB까지 지정할 수 있습니다.
+
+---
+
+## Timestamps
+
+sending time과 receiving time을 기록할 수 있습니다.
+각각 4 bytes 크기이며, 필드는 전체 10bytes입니다.
+
+---
+
+## TCP FastOpen
+
+FastOpen 필드는 특히 client-server 모델(HTTP)에서 사용되는데,
+
+클라이언트가 서버측에 SYN 패킷과 함께 FastOpen 옵션을 설정할 수 있습니다.
+
+이 때 서버는 암호화된 cookie를 SYN+ACK 패킷에 담아 응답합니다.
+cookie는 16 bytes로 구성되어 전체 18바이트 크기 옵션으로, 3-way-handshake 없이 즉시 연결을 수립할 수 있도록 하는 옵션입니다.
+
+Client가 TFO를 통해 HTTP GET request를 서버에게 보낼 수 있습니다.

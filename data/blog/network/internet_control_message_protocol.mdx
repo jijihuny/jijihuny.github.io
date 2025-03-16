@@ -1,0 +1,163 @@
+---
+title: "ICMP(Internet Control Message Protocol) : 네트워크-9"
+date: 2024-05-17
+tags: [네트워크]
+---
+
+# Overview
+
+IP 메세지는 항상 목적지로 도달할 수 있을까요?
+IP는 패킷을 목적지에 전송하기 위해 최선(Best-Effort)을 다하는 프로토콜입니다.
+즉, 완벽히 패킷이 도착지에 도착한다고 보장해주지는 않습니다. Destination 자체가 존재하지 않을 수도 있고, TTL이 만료될 수도 있습니다. 또 라우터가 혼잡해 패킷이 손실될 수도 있습니다.
+
+따라서 이러한 문제가 생겼을 때 Sender에게 이 정보를 알려줄 수 있는 방법이 필요할 수 있습니다.
+
+그러나 IP 자체적으론 이러한 Error-Reporting이나 Error-Correction 메커니즘이 정의되어있지 않습니다.
+또한 IP는 End-to-End 통신을 가능하게 할 뿐, 네트워크 상의 노드(라우터나 호스트)의 정보에 대해서는 얻을 수 있는 방법이 없습니다.
+
+이에 네트워크 상의 노드들이 서로 네트워크 제어에 관련한 메세지를 주고 받을 수 있도록 설계된 것이 바로 L3의 인터넷 제어 메세지 프로토콜-ICMP입니다.
+
+![alt text](/blog/icmp_protocol/image.png)
+
+# ICMP message
+
+ICMP 메세지는 크게 Error-Reporting과 Query로 종류가 나뉩니다.
+
+Error-Reporting 메세지는 라우터나 호스트가 IP 패킷을 처리하다 생긴 문제를 sender에게 알려주기 위해 사용됩니다.
+
+Query 메세지는 host 혹은 network manager가 라우터나 호스트로부터 어떤 정보를 요청하고 응답받기 위한 메세지 교환으로 이루어집니다.
+
+ICMP 메세지도 IGMP 메세지와 마찬가지로 IP 패킷에 incapsulation되는 네트워크 계층의 프로토콜입니다.
+
+이 때 IP의 protocol 필드는 1로 설정됩니다.
+
+![alt text](/blog/icmp_protocol/image-1.png)
+
+구체적인 메세지 포맷을알아보도록 하겠습니다.
+
+![alt text](/blog/icmp_protocol/image-2.png)
+
+ICMP 메세지는 8바이트 헤더와 Variable-size 데이터 섹션으로 나뉘어집니다.
+첫 4바이트의 경우 공통 헤더 포맷으로 적용되며, 나머지 4바이트 헤더는 메세지 타입에 따라 유동적입니다.
+
+첫 1바이트, 1바이트는 각각 메세지의 타입과 해당 메세지가 발생한 이유에 대해 기술하는 코드로 이루어집니다.
+
+Error-Reporting 상황에서의 데이터 섹션의 경우 에러가 발생한 원본 패킷을 찾기 위한 정보를 제공합니다.
+
+Query 상황에선 쿼리 타입에 따른 추가적 정보를 제공합니다.
+
+# ICMP types
+
+이제 구체적인 타입에 대해서 알아보도록 하겠습니다.
+
+![alt text](/blog/icmp_protocol/image-3.png)
+
+# Error Reporting
+
+먼저 Error Reporting 메세지는 5가지로 구성됩니다.
+
+ICMP는 항상 에러메세지를 최초 송신자에게 전송하는데요.
+에러메세지를 보내지 않는 예외사항은 아래와 같습니다.
+
+- ICMP error message를 송신 중인 데이터그램
+- 첫 번째가 아닌 fragment
+- multicast 데이터그램
+- 예약된 주소로의 데이터그램
+
+Error Reporting의 경우 아래와 같이 문제가 생긴 IP 패킷의 헤더와 데이터의 첫 8바이트를 ICMP 데이터 섹션에 넣어 다시 source로 보내게 됩니다.
+
+![alt text](/blog/icmp_protocol/image-4.png)
+
+1. Destination Unreachable
+
+만약 라우터가 데이터그램의 Destination에 대한 정보를 아직 라우팅 테이블로 가지고 있지 않거나, MTU에 의해 fragment를 수행해야 하지만 DF가 set일 경우 등의 이유가 있을 경우 데이터그램은 폐기되고 노드는 source로 이 타입의 메세지를 보냅니다.
+
+![alt text](/blog/icmp_protocol/image-5.png)
+
+type = 3으로 지정하고
+
+code의 경우 다음과 같이 정의됩니다.
+| code | reason |
+| ---  | --- |
+| 0 | 네트워크 접근 불가 |
+| 1 | 호스트 접근 불가 |
+| 2 | 프로토콜 접근 불가(미지원) |
+| 3 | 포트(Process) 접근 불가 |
+| 4 | Fragment가 필요하나, DF로 인한 실패 |
+| 13 | 목적지와의 통신이 금지됨 |
+
+2. Source Quench
+
+IP에는 flow-control(흐름 제어)과 congestion-control(혼잡 제어)에 관한 메커니즘이 없습니다.
+
+Source-Quench 메세지는 IP에 흐름제어, 혼잡제어와 유사한 인터페이스를 제공하기 위해 설계되었는데요. 라우터 혹은 호스트가 혼잡에 의해 패킷을 폐기할 경우 이 메세지가 sender에게 보내집니다.
+
+ICMP 데이터는 Destination Unreachable과 마찬가지로 실패한 데이터그램의 첫 데이터 8바이트까지 입니다.
+
+Source-Quench는 두 가지 목적이 있는데 우선 첫 번째론, 데이터그램의 폐기를 알리는 것이고, 두 번째로는 경로 상에 congestion이 있으니 전송되는 패킷의 양을 줄이라는 경고입니다.
+
+3. Time Exceeded
+
+Time Exceeded 메세지는 두 가지 케이스에 의해 발생합니다.
+
+- 데이터그램의 TTL이 0으로 도달할 경우,
+- 혹은 목적지(End Host)가 정해진 시간 안에 모든 fragment를 받지 못해 reassembly가 완료되지 못한 경우.
+
+이 때 각각 0과 1이 코드로 설정됩니다.
+
+이 Time Exceeded를 이용한 응용프로그램이 있는데 바로 Traceroute입니다.
+
+Traceroute는 목적지에 대해서 ttl을 1, 2, 3, ... 반복해서 늘리며 time exceeded 메세지를 통해 어떤 라우터를 거쳐가는지 경로를 파악합니다.
+
+4. Parameter Problem
+
+데이터그램의 헤더 값이 잘못되었을 경우 인터넷에서 심각한 문제가 될 수 있습니다.
+따라서 이런 문제를 발견하는 즉시, 데이터그램이 폐기되고 이 에러메세지를 발송합니다.
+
+5. Redirection
+
+호스트는 주로 정적인 라우팅을 합니다. 처음 호스트가 설정되면, 라우팅 테이블에는 한정적인 엔트리만을 가지는데요.
+
+이러한 상황에서 호스트는 아직 엔트리에 없는 외부 네트워크를 향하는 데이터그램은 무조건 Default 라우터로 보내게 됩니다.
+
+만약 LAN에 라우터가 하나만 있을 경우는 상관이 없으나, 두 개 이상의 라우터가 있는 경우 기본 라우터가 곧장 다른 네트워크로 데이터그램을 라우팅할 수도 있지만, 현재 LAN에 속해있는 다른 라우터를 라우팅 테이블 엔트리로 가리킬 수도 있습니다.
+
+이러한 경우 해당 IP는 기본 라우터가 아닌 최적의 라우터로 가는 것이 더 효율적이겠죠?
+
+따라서 기본 라우터는 이 패킷을 알아서 다음 라우터로 "리다이렉팅"시키지만 호스트에게 최적의 라우터를 다시 설정하라고 알려주는 메세지를 보내줍니다.
+이것이 바로 Redirection 메세지입니다.
+
+다만, 이 Redirection은 호스트의 라우팅 테이블을 조작하여 악용할 수 있는 여지가 있어 반드시 사용되지는 않습니다.
+
+![alt text](/blog/icmp_protocol/image-6.png)
+
+여기까지 ICMP 에러 메세지를 알아보았는데요.
+
+이제 Query 메세지를 알아보도록 하겠습니다.
+
+# Query
+
+Query 메세지는 다음과 같이 분류됩니다.
+
+![alt text](/blog/icmp_protocol/image-7.png)
+
+1. Echo Request and Reply
+
+echo request와 reply는 주로 네트워크 진단의 목적에서 사용되는 메세지입니다.
+request-reply 조합을 통해 호스트와 노드가 서로 통신할 수 있는지 간단히 테스트해볼 수 있습니다.
+
+![alt text](/blog/icmp_protocol/image-8.png)
+
+identifier는 echo를 보내고 받는 세션을 식별하는 번호로 주로 Process Id를 명시하고, sequence number는 echo request에 대한 reply를 식별하기 위한 번호로 사용한다.
+
+이 echo request와 reply를 사용한 응용프로그램으로 ping이 있다.
+
+ping은 destination으로의 reachability를 검증하고 RTT(Round Trip Time)을 계산한다.
+
+echo reply의 데이터는 request의 메세지를 그대로 반복하기 때문에 request에 발송 timestamp를 적고, reply가 도착했을 때 비교하여 RTT를 계산한다.
+
+2. Timstamp Request and Reply
+
+Timestamp query는 두 노드가 데이터그램의 RTT 계산 및 clock 동기화를 위해 사용하는 쿼리이다.
+
+![alt text](/blog/icmp_protocol/image-9.png)
