@@ -5,5 +5,11 @@
   "markdown.copyFiles.destination": {
     "/data/**/*": "/public/blog/${documentBaseName}/"
   },
-  "markdown.copyFiles.overwriteBehavior": "nameIncrementally",  
+  "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
+  "[mdx]": {
+    "typescript.autoClosingTags": true,
+    "typescript.suggest.enabled": false,
+    "mdx"
+  },
+  "mdx.server.enable": true
 }

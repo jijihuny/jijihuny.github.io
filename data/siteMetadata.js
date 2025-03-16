@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'Jijihuny\'s blog',
   author: 'Jijihuny',
   headerTitle: '',
-  description: '자기개발',
+  description: '',
   language: 'ko-kr',
   theme: 'system', // system, dark or light
   siteUrl: 'https://jijihuny.github.io',
@@ -14,7 +14,7 @@ const siteMetadata = {
   github: 'https://github.com/jijihuny',
   linkedin: 'https://www.linkedin.com',
   instagram: 'https://www.instagram.com/_hnnnit',
-  locale: 'en-US',
+  locale: 'ko-KR',
   analytics: {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.
