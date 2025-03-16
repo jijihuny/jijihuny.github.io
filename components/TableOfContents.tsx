@@ -12,15 +12,18 @@ const TableOfContents = ({ toc }: Props) => {
           <dl className="whitespace-pre text-sm font-medium leading-5">
             <dt className="sr-only">Name</dt>
             <dd className="text-gray-900 dark:text-gray-100">
-              <Link href={url} className={`
-                hover:text-primary-600 
-                dark:hover:text-primary-400 
+              <Link
+                href={url}
+                className={`
+                block 
+                whitespace-pre-wrap 
                 hover:translate-x-1 
-                hover:transition-transform 
-                block
-                whitespace-pre-wrap
-                `}>
-                {`${"  ".repeat(depth-1)} ${value}`}
+                hover:text-primary-600 
+                hover:transition-transform
+                dark:hover:text-primary-400
+                `}
+              >
+                {`${'  '.repeat(depth - 1)} ${value}`}
               </Link>
             </dd>
           </dl>
