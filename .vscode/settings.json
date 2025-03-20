@@ -9,7 +9,15 @@
   "[mdx]": {
     "typescript.autoClosingTags": true,
     "typescript.suggest.enabled": false,
-    "mdx"
   },
-  "mdx.server.enable": true
+  "mdx.server.enable": true,
+  "mdPasteEnhanced.path": "${projectRoot}/public/blog/${currentFileNameWithoutExt}",
+  "mdPasteEnhanced.basePath": "${projectRoot}/public",
+  "mdPasteEnhanced.defaultName": "DDmmss",
+  "mdPasteEnhanced.renderMap": [
+    "**/*.mdx => ![${userVar}](/${imagePath})",
+    "**/*.md  => ![${userVar}](${imagePath})",
+    "**/*.typ => #image(\"${imagePath}\"${userVar})",
+    "**/*     => ${imagePath}"
+  ]
 }
