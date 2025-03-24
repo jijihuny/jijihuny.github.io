@@ -1,15 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  // "files.associations": { "*.mdx": "markdown" },
-  "markdown.copyFiles.destination": {
-    "/data/**/*": "/public/blog/${documentBaseName}/"
-  },
-  "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
-  "[mdx]": {
-    "typescript.autoClosingTags": true,
-    "typescript.suggest.enabled": false,
-  },
   "mdx.server.enable": true,
   "mdPasteEnhanced.path": "${projectRoot}/public/blog/${currentFileNameWithoutExt}",
   "mdPasteEnhanced.basePath": "${projectRoot}/public",
