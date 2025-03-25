@@ -2,6 +2,9 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "mdx.server.enable": true,
+  "[mdx]": {
+    "typescript.suggest.enabled": false
+  },
   "mdPasteEnhanced.path": "${projectRoot}/public/blog/${currentFileNameWithoutExt}",
   "mdPasteEnhanced.basePath": "${projectRoot}/public",
   "mdPasteEnhanced.defaultName": "DDmmss",
