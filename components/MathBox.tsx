@@ -6,9 +6,7 @@ interface Props {
 }
 
 const MathBox = ({ children, border = true }: Props) => (
-  <div
-    className={`${border ? 'border border-solid border-gray-300' : ''} p-3  text-base`}
-  >
+  <div className={`${border ? 'border border-solid border-gray-300' : ''} p-3  text-base`}>
     {children}
   </div>
 )
