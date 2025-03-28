@@ -6,7 +6,7 @@ interface Props {
 
 const TableOfContents = ({ toc }: Props) => {
   return (
-    <ul className="flex justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-2">
+    <ul className="flex flex-col justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-2">
       {toc.map(({ value, url, depth }) => (
         <li className={`flex items-center space-x-2 `} key={value}>
           <dl className="whitespace-pre text-sm font-medium leading-5">

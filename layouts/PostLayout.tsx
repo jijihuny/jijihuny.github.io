@@ -59,7 +59,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
             <div className="xl:sticky xl:top-12">
               <dl className="pb-10 pt-6 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700">
                 <dt className="sr-only">Authors</dt>
-                <dd>
+                <dd className="max-xl:hidden">
                   <TableOfContents toc={toc} />
                 </dd>
               </dl>
